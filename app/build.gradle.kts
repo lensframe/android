@@ -7,16 +7,12 @@ plugins {
 
 android {
     namespace = "app.lensframe"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "app.lensframe"
         minSdk = 31
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -58,6 +54,7 @@ dependencies {
     implementation(project(":feature-widget"))
     ksp(libs.hilt.compiler)
     ksp(libs.androidx.hilt.compiler)
+    ksp(libs.kotlinx.metadata)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
