@@ -24,3 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "LensFrame"
 include(":app")
+include(":feature-config")
+include(":feature-widget")

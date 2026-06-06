@@ -54,6 +54,8 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
+    implementation(project(":feature-config"))
+    implementation(project(":feature-widget"))
     ksp(libs.hilt.compiler)
     ksp(libs.androidx.hilt.compiler)
     testImplementation(libs.junit)
