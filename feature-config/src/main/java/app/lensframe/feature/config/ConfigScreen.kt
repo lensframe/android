@@ -1,5 +1,10 @@
 package app.lensframe.feature.config
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.DocumentsContract
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -29,6 +35,21 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 @Composable
 fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
     val isRotationEnabled by viewModel.isRotationEnabled.collectAsState()
+
+    val selectedFolderUri by viewModel.selectedFolderUri.collectAsState()
+
+    val context = LocalContext.current
+
+    val folderPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        uri?.let {
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            context.contentResolver.takePersistableUriPermission(it, takeFlags)
+            viewModel.updateSelectedFolder(it)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -78,16 +99,30 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                     }
                     Switch(
                         checked = isRotationEnabled,
-                        onCheckedChange = { viewModel.toggleRotation(it) }
-                    )
+                        onCheckedChange = { viewModel.toggleRotation(it) })
                 }
             }
 
             Button(
-                onClick = { /* TODO: Launch Photo Picker */ },
+                onClick = {
+                    val initialUri = DocumentsContract.buildDocumentUri(
+                        "com.android.externalstorage.documents",
+                        "primary:DCIM"
+                    )
+                    folderPickerLauncher.launch(initialUri)
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Select Photo Folders")
+                Text("Select Photo Folder")
+            }
+
+            if (selectedFolderUri != null) {
+                Text(
+                    text = "Monitoring folder for photos.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }
