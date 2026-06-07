@@ -11,7 +11,6 @@ android {
 
     defaultConfig {
         minSdk = 31
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -36,6 +35,7 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.hilt.android)
+    implementation(project(":core-data"))
     ksp(libs.hilt.compiler)
     ksp(libs.kotlin.metadata.jvm)
 }

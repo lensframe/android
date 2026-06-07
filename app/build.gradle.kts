@@ -15,7 +15,6 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -26,13 +25,16 @@ android {
             }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_26
         targetCompatibility = JavaVersion.VERSION_26
     }
+
     buildFeatures {
         compose = true
     }
+
     buildToolsVersion = "36.1.0"
 }
 
