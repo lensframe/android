@@ -11,10 +11,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -36,7 +41,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
     val isRotationEnabled by viewModel.isRotationEnabled.collectAsState()
 
-    val selectedFolderUri by viewModel.selectedFolderUri.collectAsState()
+    val selectedFolders by viewModel.selectedFolders.collectAsState()
 
     val context = LocalContext.current
 
@@ -46,7 +51,7 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
         uri?.let {
             val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
             context.contentResolver.takePersistableUriPermission(it, takeFlags)
-            viewModel.updateSelectedFolder(it)
+            viewModel.addFolder(it)
         }
     }
 
@@ -99,7 +104,58 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                     }
                     Switch(
                         checked = isRotationEnabled,
-                        onCheckedChange = { viewModel.toggleRotation(it) })
+                        onCheckedChange = { viewModel.toggleRotation(it) }
+                    )
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            Text(
+                text = "Photo Sources",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (selectedFolders.isEmpty()) {
+                Text(
+                    text = "No folders selected yet.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                selectedFolders.forEach { uri ->
+                    val decodedPath = Uri.decode(uri.lastPathSegment ?: "")
+                    val readableName = decodedPath.substringAfterLast(":")
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = readableName,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            IconButton(onClick = { viewModel.removeFolder(uri) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Remove Folder",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -111,18 +167,11 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                     )
                     folderPickerLauncher.launch(initialUri)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
             ) {
-                Text("Select Photo Folder")
-            }
-
-            if (selectedFolderUri != null) {
-                Text(
-                    text = "Monitoring folder for photos.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                Text("Add Photo Folder")
             }
         }
     }
