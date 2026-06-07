@@ -58,6 +58,7 @@ dependencies {
     implementation(project(":feature-widget"))
     ksp(libs.hilt.compiler)
     ksp(libs.androidx.hilt.compiler)
+    ksp(libs.kotlin.metadata.jvm)
     ksp(libs.kotlinx.metadata)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

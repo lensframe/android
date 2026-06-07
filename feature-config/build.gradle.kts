@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+    ksp(libs.kotlin.metadata.jvm)
     ksp(libs.kotlinx.metadata)
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
