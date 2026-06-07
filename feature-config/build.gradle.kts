@@ -15,13 +15,17 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_26
+        targetCompatibility = JavaVersion.VERSION_26
     }
 
     buildFeatures {
         compose = true
     }
+}
+
+kotlin {
+    jvmToolchain(26)
 }
 
 dependencies {
