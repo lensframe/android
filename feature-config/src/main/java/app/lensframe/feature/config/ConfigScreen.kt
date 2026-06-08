@@ -60,13 +60,10 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text("LensFrame", fontWeight = FontWeight.Bold)
-                },
+                title = { Text("LensFrame", fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme
-                        .onPrimaryContainer
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
         }
@@ -86,9 +83,7 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Row(
                     modifier = Modifier
@@ -98,30 +93,21 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text(
-                            "Background Rotation",
-                            fontWeight = FontWeight.Medium
-                        )
+                        Text("Background Rotation", fontWeight = FontWeight.Medium)
                         Text(
                             text = "Update widget photos automatically",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Switch(
-                        checked = isRotationEnabled,
-                        onCheckedChange = { viewModel.toggleRotation(it) }
+                    Switch(checked = isRotationEnabled, onCheckedChange = { viewModel.toggleRotation(it) }
                     )
                 }
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            Text(
-                text = "Photo Sources",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Text(text = "Photo Sources", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
             if (selectedFolders.isEmpty()) {
                 Text(
@@ -136,11 +122,8 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        elevation = CardDefaults.cardElevation
-                            (defaultElevation = 2.dp)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Row(
                             modifier = Modifier
