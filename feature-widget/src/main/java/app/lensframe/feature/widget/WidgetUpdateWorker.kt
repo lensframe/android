@@ -117,7 +117,7 @@ class WidgetUpdateWorker @AssistedInject constructor(
     }
 
     companion object {
-        private const val MAX_SIZE = 800
+        private const val MAX_SIZE = 400
         private const val CACHED_FILE_NAME = "widget_cache.jpg"
     }
 }
