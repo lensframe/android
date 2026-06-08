@@ -2,6 +2,7 @@ package app.lensframe.feature.widget
 
 import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import app.lensframe.core.data.WidgetScheduler
@@ -20,15 +21,16 @@ class WidgetSchedulerImpl @Inject constructor(
 ) : WidgetScheduler {
 
     override fun scheduleWidgetUpdate() {
-        val request = PeriodicWorkRequestBuilder<WidgetUpdateWorker>(
-            15, TimeUnit.MINUTES
-        ).build()
+        val periodicRequest = PeriodicWorkRequestBuilder<WidgetUpdateWorker>(15, TimeUnit.MINUTES).build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             WIDGET_UPDATE_WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
-            request
+            periodicRequest
         )
+
+        val instantRequest = OneTimeWorkRequestBuilder<WidgetUpdateWorker>().build()
+        WorkManager.getInstance(context).enqueue(instantRequest)
     }
 
     override fun cancelWidgetUpdate() {
@@ -36,7 +38,7 @@ class WidgetSchedulerImpl @Inject constructor(
     }
 
     companion object {
-        private const val WIDGET_UPDATE_WORK_NAME = "WidgetUpdateWork"
+        private const val WIDGET_UPDATE_WORK_NAME = "WidgetUpdateWork_Periodic"
     }
 }
 
