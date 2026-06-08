@@ -34,8 +34,12 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.documentfile)
     implementation(project(":core-data"))
     ksp(libs.hilt.compiler)
     ksp(libs.kotlin.metadata.jvm)
+    ksp(libs.androidx.hilt.compiler)
 }
