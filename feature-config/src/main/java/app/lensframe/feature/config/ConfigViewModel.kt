@@ -60,4 +60,11 @@ class ConfigViewModel @Inject constructor(
             widgetScheduler.scheduleWidgetUpdate()
         }
     }
+
+    fun clearFolders() {
+        viewModelScope.launch {
+            preferencesRepository.clearFolders()
+            widgetScheduler.scheduleWidgetUpdate()
+        }
+    }
 }

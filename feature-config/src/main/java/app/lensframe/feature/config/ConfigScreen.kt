@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -63,7 +65,8 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    titleContentColor = MaterialTheme.colorScheme
+                        .onPrimaryContainer
                 )
             )
         }
@@ -95,7 +98,10 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text("Background Rotation", fontWeight = FontWeight.Medium)
+                        Text(
+                            "Background Rotation",
+                            fontWeight = FontWeight.Medium
+                        )
                         Text(
                             text = "Update widget photos automatically",
                             style = MaterialTheme.typography.bodySmall,
@@ -133,7 +139,8 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        elevation = CardDefaults.cardElevation
+                            (defaultElevation = 2.dp)
                     ) {
                         Row(
                             modifier = Modifier
@@ -147,7 +154,9 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )
-                            IconButton(onClick = { viewModel.removeFolder(uri) }) {
+                            IconButton(onClick = {
+                                viewModel.removeFolder(uri)
+                            }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
                                     contentDescription = "Remove Folder",
@@ -159,19 +168,36 @@ fun ConfigScreen(viewModel: ConfigViewModel = hiltViewModel()) {
                 }
             }
 
-            Button(
-                onClick = {
-                    val initialUri = DocumentsContract.buildDocumentUri(
-                        "com.android.externalstorage.documents",
-                        "primary:DCIM"
-                    )
-                    folderPickerLauncher.launch(initialUri)
-                },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Add Photo Folder")
+                Button(
+                    onClick = {
+                        val initialUri = DocumentsContract.buildDocumentUri(
+                            "com.android.externalstorage.documents",
+                            "primary:DCIM"
+                        )
+                        folderPickerLauncher.launch(initialUri)
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Add Photo Folder")
+                }
+
+                if (selectedFolders.isNotEmpty()) {
+                    OutlinedButton(
+                        onClick = { viewModel.clearFolders() },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Clear All")
+                    }
+                }
             }
         }
     }

@@ -41,6 +41,12 @@ class PreferencesRepository @Inject constructor(private val dataStore: DataStore
         }
     }
 
+    suspend fun clearFolders() {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SELECTED_FOLDERS] = emptySet()
+        }
+    }
+
     suspend fun setRotationEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ROTATION_ENABLED] = enabled
