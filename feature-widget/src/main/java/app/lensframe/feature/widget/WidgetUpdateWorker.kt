@@ -29,6 +29,7 @@ class WidgetUpdateWorker @AssistedInject constructor(
             try {
                 val folders = preferencesRepository.selectedFoldersFlow.first()
                 if (folders.isEmpty()) {
+                    clearWidgetCache()
                     return@withContext Result.success()
                 }
 
@@ -38,6 +39,7 @@ class WidgetUpdateWorker @AssistedInject constructor(
                     it.type?.startsWith("image/") == true
                 }
                 if (images.isNullOrEmpty()) {
+                    clearWidgetCache()
                     return@withContext Result.success()
                 }
                 val selectedImageUri = images.random().uri
@@ -45,7 +47,7 @@ class WidgetUpdateWorker @AssistedInject constructor(
                 val scaledBitmap =
                     decodeSampledBitmapFromUri(selectedImageUri) ?: return@withContext Result.failure()
 
-                val cacheFile = File(applicationContext.filesDir, "widget_cache.jpg")
+                val cacheFile = File(applicationContext.filesDir, CACHED_FILE_NAME)
                 FileOutputStream(cacheFile).use { out ->
                     scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
                 }
@@ -70,6 +72,14 @@ class WidgetUpdateWorker @AssistedInject constructor(
                 Result.failure()
             }
         }
+    }
+
+    private suspend fun clearWidgetCache() {
+        val cacheFile = File(applicationContext.filesDir, CACHED_FILE_NAME)
+        if (cacheFile.exists()) {
+            cacheFile.delete()
+        }
+        LensFrameWidget().updateAll(applicationContext)
     }
 
     private fun decodeSampledBitmapFromUri(uri: android.net.Uri): Bitmap? {
@@ -108,5 +118,6 @@ class WidgetUpdateWorker @AssistedInject constructor(
 
     companion object {
         private const val MAX_SIZE = 800
+        private const val CACHED_FILE_NAME = "widget_cache.jpg"
     }
 }
