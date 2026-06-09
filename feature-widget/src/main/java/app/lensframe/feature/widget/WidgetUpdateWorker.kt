@@ -3,8 +3,11 @@ package app.lensframe.feature.widget
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.net.Uri
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
+import androidx.exifinterface.media.ExifInterface
 import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -47,9 +50,12 @@ class WidgetUpdateWorker @AssistedInject constructor(
                 val scaledBitmap =
                     decodeSampledBitmapFromUri(selectedImageUri) ?: return@withContext Result.failure()
 
+                val rotationDegrees = getRotationDegrees(selectedImageUri)
+                val finalBitmap = rotateBitmap(scaledBitmap, rotationDegrees)
+
                 val cacheFile = File(applicationContext.filesDir, CACHED_FILE_NAME)
                 FileOutputStream(cacheFile).use { out ->
-                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+                    finalBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
                 }
 
                 LensFrameWidget().updateAll(applicationContext)
@@ -114,6 +120,32 @@ class WidgetUpdateWorker @AssistedInject constructor(
             }
         }
         return inSampleSize
+    }
+
+    private fun getRotationDegrees(uri: Uri): Int {
+        return try {
+            applicationContext.contentResolver.openInputStream(uri)?.use { stream ->
+                val exif = ExifInterface(stream)
+                when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
+                    ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                    ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                    ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                    else -> 0
+                }
+            } ?: 0
+        } catch (e: Exception) {
+            Log.e("WidgetWorker", "Failed to read EXIF data", e)
+            0
+        }
+    }
+
+    private fun rotateBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
+        if (degrees == 0) {
+            return bitmap
+        }
+
+        val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
     companion object {

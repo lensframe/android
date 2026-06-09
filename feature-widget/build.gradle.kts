@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     implementation(libs.hilt.android)
     implementation(libs.androidx.documentfile)
+    implementation(libs.androidx.exifinterface)
     implementation(project(":core-data"))
     ksp(libs.hilt.compiler)
     ksp(libs.kotlin.metadata.jvm)
