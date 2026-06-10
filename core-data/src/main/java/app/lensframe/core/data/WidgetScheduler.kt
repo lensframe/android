@@ -1,6 +1,7 @@
 package app.lensframe.core.data
 
 interface WidgetScheduler {
-    fun scheduleWidgetUpdate()
-    fun cancelWidgetUpdate()
+    fun startPeriodicRotation()
+    fun cancelPeriodicRotation()
+    fun updateInstantly()
 }

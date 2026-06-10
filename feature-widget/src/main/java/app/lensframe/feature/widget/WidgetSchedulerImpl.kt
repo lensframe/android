@@ -6,6 +6,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import app.lensframe.core.data.WidgetScheduler
 import dagger.Binds
 import dagger.Module
@@ -21,25 +22,30 @@ class WidgetSchedulerImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : WidgetScheduler {
 
-    override fun scheduleWidgetUpdate() {
-        val periodicRequest = PeriodicWorkRequestBuilder<WidgetUpdateWorker>(15, TimeUnit.MINUTES).build()
+    override fun startPeriodicRotation() {
+        val periodicRequest = PeriodicWorkRequestBuilder<WidgetUpdateWorker>(
+            15, TimeUnit.MINUTES
+        ).setInputData(workDataOf(WidgetUpdateWorker.IS_PERIODIC to true)).build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             WIDGET_UPDATE_WORK_NAME_PERIODIC,
             ExistingPeriodicWorkPolicy.KEEP,
             periodicRequest
         )
+    }
 
+    override fun cancelPeriodicRotation() {
+        WorkManager.getInstance(context).cancelUniqueWork(WIDGET_UPDATE_WORK_NAME_PERIODIC)
+    }
+
+    override fun updateInstantly() {
         val instantRequest = OneTimeWorkRequestBuilder<WidgetUpdateWorker>().build()
+
         WorkManager.getInstance(context).enqueueUniqueWork(
             WIDGET_UPDATE_WORK_NAME_INSTANT,
             ExistingWorkPolicy.REPLACE,
             instantRequest
         )
-    }
-
-    override fun cancelWidgetUpdate() {
-        WorkManager.getInstance(context).cancelUniqueWork(WIDGET_UPDATE_WORK_NAME_PERIODIC)
     }
 
     companion object {

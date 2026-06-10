@@ -30,6 +30,11 @@ class WidgetUpdateWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
             try {
+                val isPeriodic = inputData.getBoolean(IS_PERIODIC, false)
+                if (isPeriodic && !preferencesRepository.isRotationEnabledFlow.first()) {
+                    return@withContext Result.success()
+                }
+
                 val folders = preferencesRepository.selectedFoldersFlow.first()
                 if (folders.isEmpty()) {
                     clearWidgetCache()
@@ -149,6 +154,7 @@ class WidgetUpdateWorker @AssistedInject constructor(
     }
 
     companion object {
+        const val IS_PERIODIC = "is_periodic"
         private const val MAX_SIZE = 400
         private const val CACHED_FILE_NAME = "widget_cache.jpg"
     }

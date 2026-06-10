@@ -8,6 +8,7 @@ import app.lensframe.core.data.WidgetScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,16 +34,22 @@ class ConfigViewModel @Inject constructor(
         )
 
     init {
-        widgetScheduler.scheduleWidgetUpdate()
+        viewModelScope.launch {
+            if (preferencesRepository.isRotationEnabledFlow.first()) {
+                widgetScheduler.startPeriodicRotation()
+            } else {
+                widgetScheduler.cancelPeriodicRotation()
+            }
+        }
     }
 
     fun toggleRotation(enabled: Boolean) {
         viewModelScope.launch {
             preferencesRepository.setRotationEnabled(enabled)
             if (enabled) {
-                widgetScheduler.scheduleWidgetUpdate()
+                widgetScheduler.startPeriodicRotation()
             } else {
-                widgetScheduler.cancelWidgetUpdate()
+                widgetScheduler.cancelPeriodicRotation()
             }
         }
     }
@@ -50,21 +57,21 @@ class ConfigViewModel @Inject constructor(
     fun addFolder(uri: Uri) {
         viewModelScope.launch {
             preferencesRepository.addFolder(uri)
-            widgetScheduler.scheduleWidgetUpdate()
+            widgetScheduler.updateInstantly()
         }
     }
 
     fun removeFolder(uri: Uri) {
         viewModelScope.launch {
             preferencesRepository.removeFolder(uri)
-            widgetScheduler.scheduleWidgetUpdate()
+            widgetScheduler.updateInstantly()
         }
     }
 
     fun clearFolders() {
         viewModelScope.launch {
             preferencesRepository.clearFolders()
-            widgetScheduler.scheduleWidgetUpdate()
+            widgetScheduler.updateInstantly()
         }
     }
 }
