@@ -26,6 +26,9 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.coroutines.test)
     ksp(libs.hilt.compiler)
     ksp(libs.kotlin.metadata.jvm)
 }
