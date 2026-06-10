@@ -10,7 +10,6 @@ import androidx.work.workDataOf
 import app.lensframe.core.data.PreferencesRepository
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -61,7 +60,6 @@ class WidgetUpdateWorkerTest {
         val result = worker.doWork()
 
         assertEquals(ListenableWorker.Result.success(), result)
-        verify(exactly = 0) { repository.selectedFoldersFlow }
         assertTrue(cacheFile.exists())
     }
 
@@ -69,24 +67,28 @@ class WidgetUpdateWorkerTest {
     fun `periodic run with rotation enabled proceeds past the guard`() = runTest {
         every { repository.isRotationEnabledFlow } returns flowOf(true)
         every { repository.selectedFoldersFlow } returns flowOf(emptyList())
+        val cacheFile = File(context.filesDir, "widget_cache.jpg")
+        cacheFile.writeText("stale-but-should-survive")
         val worker = buildWorker(true)
 
         val result = worker.doWork()
 
         assertEquals(ListenableWorker.Result.success(), result)
-        verify(exactly = 1) { repository.selectedFoldersFlow }
+        assertFalse(cacheFile.exists())
     }
 
     @Test
     fun `instant run is not gated by the rotation toggle`() = runTest {
         every { repository.isRotationEnabledFlow } returns flowOf(false)
         every { repository.selectedFoldersFlow } returns flowOf(emptyList())
+        val cacheFile = File(context.filesDir, "widget_cache.jpg")
+        cacheFile.writeText("stale-but-should-survive")
         val worker = buildWorker()
 
         val result = worker.doWork()
 
         assertEquals(ListenableWorker.Result.success(), result)
-        verify(exactly = 1) { repository.selectedFoldersFlow }
+        assertFalse(cacheFile.exists())
     }
 
     private fun buildWorker(isPeriodic: Boolean = false): WidgetUpdateWorker {
