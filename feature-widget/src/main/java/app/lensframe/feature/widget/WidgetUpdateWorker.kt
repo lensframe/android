@@ -25,7 +25,8 @@ import java.io.FileOutputStream
 class WidgetUpdateWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParameters: WorkerParameters,
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val imageProcessor: ImageProcessor
 ) : CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
@@ -52,11 +53,8 @@ class WidgetUpdateWorker @AssistedInject constructor(
                 }
                 val selectedImageUri = images.random().uri
 
-                val scaledBitmap =
-                    decodeSampledBitmapFromUri(selectedImageUri) ?: return@withContext Result.failure()
-
-                val rotationDegrees = getRotationDegrees(selectedImageUri)
-                val finalBitmap = rotateBitmap(scaledBitmap, rotationDegrees)
+                val finalBitmap = imageProcessor.processImageForWidget(selectedImageUri, MAX_SIZE)
+                    ?: return@withContext Result.failure()
 
                 val cacheFile = File(applicationContext.filesDir, CACHED_FILE_NAME)
                 FileOutputStream(cacheFile).use { out ->
@@ -91,66 +89,6 @@ class WidgetUpdateWorker @AssistedInject constructor(
             cacheFile.delete()
         }
         LensFrameWidget().updateAll(applicationContext)
-    }
-
-    private fun decodeSampledBitmapFromUri(uri: android.net.Uri): Bitmap? {
-        val resolver = applicationContext.contentResolver
-
-        val options = BitmapFactory.Options().apply {
-            inJustDecodeBounds = true
-        }
-
-        resolver.openInputStream(uri)?.use { stream ->
-            BitmapFactory.decodeStream(stream, null, options)
-        }
-
-        options.inSampleSize = calculateInSampleSize(options)
-
-        options.inJustDecodeBounds = false
-
-        return resolver.openInputStream(uri)?.use { stream ->
-            BitmapFactory.decodeStream(stream, null, options)
-        }
-    }
-
-    private fun calculateInSampleSize(options: BitmapFactory.Options): Int {
-        val (height: Int, width: Int) = options.outHeight to options.outWidth
-        var inSampleSize = 1
-
-        if (height > MAX_SIZE || width > MAX_SIZE) {
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
-            while (halfHeight / inSampleSize >= MAX_SIZE && halfWidth / inSampleSize >= MAX_SIZE) {
-                inSampleSize *= 2
-            }
-        }
-        return inSampleSize
-    }
-
-    private fun getRotationDegrees(uri: Uri): Int {
-        return try {
-            applicationContext.contentResolver.openInputStream(uri)?.use { stream ->
-                val exif = ExifInterface(stream)
-                when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
-                    ExifInterface.ORIENTATION_ROTATE_90 -> 90
-                    ExifInterface.ORIENTATION_ROTATE_180 -> 180
-                    ExifInterface.ORIENTATION_ROTATE_270 -> 270
-                    else -> 0
-                }
-            } ?: 0
-        } catch (e: Exception) {
-            Log.e("WidgetWorker", "Failed to read EXIF data", e)
-            0
-        }
-    }
-
-    private fun rotateBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
-        if (degrees == 0) {
-            return bitmap
-        }
-
-        val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
     companion object {
